@@ -1,0 +1,17 @@
+{
+  "name": "dropbox-clone",
+  "description": "",
+  "main": "index.html",
+  "license": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "Ionicons": "ionicons#^2.0.1",
+    "bootstrap": "^4.1.0"
+  }
+}
