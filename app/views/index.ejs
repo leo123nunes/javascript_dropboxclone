@@ -12,7 +12,6 @@
     <link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/css/dropbox-clone.css" rel="stylesheet">
     <style>
-        
     </style>
 </head>
 
@@ -181,7 +180,7 @@
                         <div class="col-md-9">
                             <ul class="list-unstyled" id="list-of-files-and-directories"></ul>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3 file-options">
                             <button id="btn-send-file" type="button" class="btn btn-primary btn-block btn-sm">Send files</button>
                             <input type="file" id="files" style="display:none;" multiple>
                             <button id="btn-new-folder" type="button" class="btn btn-link btn-block btn-sm btn-icon"><i class="ion-android-folder-open"></i>New folder</button>
@@ -228,6 +227,7 @@
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-database.js"></script>
     <script src="src/controller/DropBoxController.js"></script>
     <script src="src/index.js"></script>
 </body>

@@ -1,5 +1,14 @@
 class DropBoxController{
     constructor(){
+
+        this.initElements()
+        this.initFireBase()
+        this.initEvents()
+
+    }
+
+    initElements(){
+
         this.btnSendFileEl = document.querySelector('#btn-send-file')
         this.inputFileEl = document.querySelector("#files")
         this.snackBarEl = document.querySelector("#react-snackbar-root")
@@ -8,9 +17,6 @@ class DropBoxController{
         this.snackBarPercentProgressEl = this.snackBarEl.querySelector(".percent-progress")
         this.snackBarTimeLeft = this.snackBarEl.querySelector(".timeleft")
 
-
-        this.initFireBase()
-        this.initEvents()
     }
 
     initFireBase(){
@@ -23,8 +29,12 @@ class DropBoxController{
             messagingSenderId: "765274120235",
             appId: "1:765274120235:web:bcab4a207b3c4b93698a6e"
         };
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+
+        firebase.initializeApp(firebaseConfig)
+    }
+
+    getFirebaseRef(){
+        return firebase.database().ref('/files')
     }
 
     initEvents(){
@@ -36,8 +46,21 @@ class DropBoxController{
             this.inputFileEl.style.display = "none"
             this.snackBarEl.style.display = "block"
 
-            this.sendFiles(event.target.files)
+            this.sendFiles(event.target.files).then(files => {
+                files.forEach(file => {
+                    this.getFirebaseRef().push().set(file.files['input-file'])
+                })
+
+                setTimeout(() => this.initialState(), 2000)
+            }).catch(error => console.error(error))
         })
+    }
+
+    initialState(){
+        this.btnSendFileEl.disabled = false
+        this.inputFileEl.style.display = "none"
+        this.snackBarEl.style.display = "none"
+        this.inputFileEl.value = ""
     }
 
     sendFiles(files){
@@ -68,17 +91,10 @@ class DropBoxController{
                 var startTime = new Date()
 
                 ajax.upload.onprogress = event => {
+                    this.btnSendFileEl.disabled = true
                     this.calculateProgressBar(event.loaded, event.total)
                     this.changeSnackbarTitle(file.name)
                     this.calculateTimeRemaining(startTime, event.loaded, event.total - event.loaded)
-                }
-
-                ajax.upload.onloadend = event => {
-                    this.inputFileEl.style.display = "none"
-                    this.inputFileEl.value = ""
-                    setTimeout(() => {
-                        this.snackBarEl.style.display = "none" 
-                    }, 2000)
                 }
 
                 ajax.send(formData)
