@@ -12,6 +12,34 @@
     <link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/css/dropbox-clone.css" rel="stylesheet">
     <style>
+        #list-of-files-and-directories{
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        #list-of-files-and-directories #file-name{
+            width: 100%;
+            height: 30%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap; 
+            padding: 5px;
+        }
+
+        #list-of-files-and-directories li svg{
+            width: 100%;
+            height: 70%;
+            background-color: rgba(148, 148, 148, 0.281);
+        }
+
+        #list-of-files-and-directories li{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 150px;
+            height: 150px;
+        }
     </style>
 </head>
 

@@ -4,6 +4,7 @@ class DropBoxController{
         this.initElements()
         this.initFireBase()
         this.initEvents()
+        this.readFiles()
 
     }
 
@@ -16,6 +17,7 @@ class DropBoxController{
         this.snackBarfileNameEl = this.snackBarEl.querySelector(".filename")
         this.snackBarPercentProgressEl = this.snackBarEl.querySelector(".percent-progress")
         this.snackBarTimeLeft = this.snackBarEl.querySelector(".timeleft")
+        this.listFilesEl = document.querySelector("#list-of-files-and-directories")
 
     }
 
@@ -145,8 +147,8 @@ class DropBoxController{
         
     }
 
-    getFileIcon(file){
-        switch(file.type){
+    getFileIcon(type){
+        switch(type){
             case 'folder':
                 return `
                 <svg width="160" height="160" viewBox="0 0 160 160" class="mc-icon-template-content tile__preview tile__preview--icon">
@@ -244,7 +246,7 @@ class DropBoxController{
             case 'audio/aac':
             case 'audio/midi':
             case 'audio/ogg':
-            case 'audio/webm':
+            case 'audio/mpeg':
             case 'audio/x-wav':
                 return `
                 <svg width="160" height="160" viewBox="0 0 160 160" class="mc-icon-template-content tile__preview tile__preview--icon">
@@ -312,10 +314,36 @@ class DropBoxController{
         }
     }
 
-    getFileView(file){
-        return `
-        ${this.getFileIcon()}
-        <div class="name text-center">${file.name}</div>
+    getFileView(name, type, key){
+        var li = document.createElement("li")
+
+        li.innerHTML = ''
+
+        li.innerHTML = 
         `
+        ${this.getFileIcon(type)}
+        <div class="name text-center" id="file-name">${name}</div>
+        `
+
+        li.dataset.key = key
+
+        this.listFilesEl.appendChild(li)
+    }
+
+    readFiles(){
+        this.getFirebaseRef().on('value', data => {
+            var files = data.val()
+
+            this.listFilesEl.innerHTML = ""
+
+            for(var file in files){
+                var name = files[file].name
+                var type = files[file].type
+                var key = file
+
+                this.getFileView(name, type, key)
+            }
+
+        })
     }
 }
