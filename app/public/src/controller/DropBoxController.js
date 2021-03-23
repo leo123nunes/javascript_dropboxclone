@@ -327,7 +327,69 @@ class DropBoxController{
 
         li.dataset.key = key
 
-        this.listFilesEl.appendChild(li)
+        li.addEventListener('click', element => {
+            var items = Array.from(this.listFilesEl.children)
+
+            document.onclick = e => {
+                if(e.ctrlKey){
+                    this.ctrlSelectionFiles(li)
+                }else if(e.shiftKey){
+                    this.shiftSelectionFiles(items, li)
+                }else{
+                    this.singleSelection(items, li)
+                }
+            }
+        })
+
+        return li
+    }
+
+    shiftSelectionFiles(items, li){
+        var initialIndex = 0
+        for(var index in items){
+            if(items[index].classList.contains('selected')){
+                initialIndex = index
+            }
+        }
+
+        li.classList.toggle('selected')
+
+        var parent = li.parentNode
+
+        var finalIndex = Array.prototype.indexOf.call(parent.children, li)
+
+        var distance = Math.abs(initialIndex - finalIndex)
+
+        if(distance > 1){
+            if(initialIndex > finalIndex){
+                Array.from(this.listFilesEl.children).forEach( element => {
+                    var index = Array.prototype.indexOf.call(element.parentNode.children, element)
+                    if( index > finalIndex && index < initialIndex){
+                        element.classList.toggle('selected')
+                    }
+                })
+            }else{
+                Array.from(this.listFilesEl.children).forEach( element => {
+                    var index = Array.prototype.indexOf.call(element.parentNode.children, element)
+                    if( index > initialIndex && index < finalIndex){
+                        element.classList.toggle('selected')
+                    }
+                })
+            }
+        }
+    }
+
+    ctrlSelectionFiles(li){
+        li.classList.toggle('selected')
+    }
+
+    singleSelection(items, li){
+        items.forEach(element => {
+            if(element.classList.contains('selected')){
+                element.classList.toggle('selected')
+            }
+        })
+        li.classList.toggle('selected')
     }
 
     readFiles(){
@@ -341,7 +403,7 @@ class DropBoxController{
                 var type = files[file].type
                 var key = file
 
-                this.getFileView(name, type, key)
+                this.listFilesEl.appendChild(this.getFileView(name, type, key))
             }
 
         })
