@@ -1,9 +1,10 @@
 class DropBoxController{
     constructor(){
-
+        
         this.initElements()
-        this.initFireBase()
         this.initEvents()
+        this.customizedEvents()
+        this.initFireBase()
         this.readFiles()
 
     }
@@ -11,6 +12,9 @@ class DropBoxController{
     initElements(){
 
         this.btnSendFileEl = document.querySelector('#btn-send-file')
+        this.btnNewFolderEl = document.querySelector("#btn-new-folder")
+        this.btnRenameEl = document.querySelector("#btn-rename")
+        this.btnDeleteEl = document.querySelector("#btn-delete")
         this.inputFileEl = document.querySelector("#files")
         this.snackBarEl = document.querySelector("#react-snackbar-root")
         this.progressBarEl = this.snackBarEl.querySelector(".mc-progress-bar-fg")
@@ -19,6 +23,10 @@ class DropBoxController{
         this.snackBarTimeLeft = this.snackBarEl.querySelector(".timeleft")
         this.listFilesEl = document.querySelector("#list-of-files-and-directories")
 
+    }
+
+    customizedEvents(){
+        this.onselectionchange = new Event('onselectionchange')
     }
 
     initFireBase(){
@@ -55,6 +63,20 @@ class DropBoxController{
 
                 setTimeout(() => this.initialState(), 2000)
             }).catch(error => console.error(error))
+        })
+
+        this.listFilesEl.addEventListener('onselectionchange', event => {
+            var selectedFiles = document.querySelectorAll(".selected").length
+
+            if(selectedFiles === 1){
+                this.btnDeleteEl.style.display = "block"
+                this.btnRenameEl.style.display = "block"
+            }else if(selectedFiles > 1){
+                this.btnRenameEl.style.display = "none"
+            }else{
+                this.btnDeleteEl.style.display = "none"
+                this.btnRenameEl.style.display = "none"
+            }
         })
     }
 
@@ -327,10 +349,12 @@ class DropBoxController{
 
         li.dataset.key = key
 
-        li.addEventListener('click', element => {
+        li.addEventListener('click', e => {
             var items = Array.from(this.listFilesEl.children)
 
-            document.onclick = e => {
+            if(li.classList.contains('selected')){
+                li.classList.toggle('selected')
+            }else{
                 if(e.ctrlKey){
                     this.ctrlSelectionFiles(li)
                 }else if(e.shiftKey){
@@ -339,6 +363,8 @@ class DropBoxController{
                     this.singleSelection(items, li)
                 }
             }
+
+            this.listFilesEl.dispatchEvent(this.onselectionchange)
         })
 
         return li
