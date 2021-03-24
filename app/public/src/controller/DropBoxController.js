@@ -47,7 +47,28 @@ class DropBoxController{
         return firebase.database().ref('/files')
     }
 
+    getFilesSelection(){
+        return this.listFilesEl.querySelectorAll('.selected')
+    }
+
     initEvents(){
+
+        this.btnRenameEl.addEventListener('click', e => {
+            var file = JSON.parse(this.getFilesSelection()[0].dataset.file)
+
+            var newName = prompt("Enter the new name:", file.name)
+
+            if(newName){
+
+                var key = this.getFilesSelection()[0].dataset.key
+
+                file.name = newName
+
+                this.getFirebaseRef().child(key).set(file)
+            }
+
+        })
+
         this.btnSendFileEl.addEventListener('click', event => {
             this.inputFileEl.style.display = "block"
         })
@@ -66,7 +87,8 @@ class DropBoxController{
         })
 
         this.listFilesEl.addEventListener('onselectionchange', event => {
-            var selectedFiles = document.querySelectorAll(".selected").length
+
+            var selectedFiles = this.getFilesSelection().length
 
             if(selectedFiles === 1){
                 this.btnDeleteEl.style.display = "block"
@@ -336,18 +358,19 @@ class DropBoxController{
         }
     }
 
-    getFileView(name, type, key){
+    getFileView(file, key){
         var li = document.createElement("li")
 
         li.innerHTML = ''
 
         li.innerHTML = 
         `
-        ${this.getFileIcon(type)}
-        <div class="name text-center" id="file-name">${name}</div>
+        ${this.getFileIcon(file.type)}
+        <div class="name text-center" id="file-name">${file.name}</div>
         `
 
         li.dataset.key = key
+        li.dataset.file = JSON.stringify(file)
 
         li.addEventListener('click', e => {
             var items = Array.from(this.listFilesEl.children)
@@ -424,12 +447,11 @@ class DropBoxController{
 
             this.listFilesEl.innerHTML = ""
 
-            for(var file in files){
-                var name = files[file].name
-                var type = files[file].type
-                var key = file
+            for(var index in files){
+                var file = files[index]
+                var key = index
 
-                this.listFilesEl.appendChild(this.getFileView(name, type, key))
+                this.listFilesEl.appendChild(this.getFileView(file, key))
             }
 
         })
