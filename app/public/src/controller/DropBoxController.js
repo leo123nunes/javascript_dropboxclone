@@ -127,7 +127,7 @@ class DropBoxController{
         this.inputFileEl.value = ""
     }
 
-    ajax(url, method = "GET", formdata = new FormData(), onprogress = function(){}, onload = function(){}){
+    ajax(url, method = "GET", data, onprogress = function(){}, onload = function(){}){
         
         var ajax = new XMLHttpRequest()
 
@@ -139,13 +139,17 @@ class DropBoxController{
             onload(ajax)
         }
 
-        if(typeof formdata == 'string'){
+        // Deleting a file, the data will be the path of the file in string mode
+
+        if(typeof data == 'string'){
             ajax.setRequestHeader('Content-Type', 'application/json');
-            ajax.send(JSON.stringify({filePath: formdata}))
+            ajax.send(JSON.stringify({filePath: data}))
         }
 
-        if(typeof formdata == 'object'){
-            ajax.send(formdata)
+        // Uploading a file, the data will be a formdata of the file
+
+        if(typeof data == 'object'){
+            ajax.send(data)
         }
     }
 
