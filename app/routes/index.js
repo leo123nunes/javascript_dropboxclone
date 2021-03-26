@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var formidable = require('formidable')
+var fs = require('fs')
+var path = require('path')
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -8,14 +10,31 @@ router.get('/', function(req, res, next) {
 });
 
 router.post('/uploads', (req, resp) => {
-  var form = new formidable.IncomingForm({
-    uploadDir: './uploads',
-    keepExtensions: true
-  })
+  try{
+    var form = new formidable.IncomingForm({
+      uploadDir: './uploads',
+      keepExtensions: true
+    })
+  
+    form.parse(req, (error, fields, files) => {
+      resp.send({files})
+    })
+  }catch(error){
+    console.log(`Error updating the file: ${error}`)
+    resp.status(500).send()
+  }
+})
 
-  form.parse(req, (error, fields, files) => {
-    resp.send({files})
-  })
+router.delete('/deletefiles', (req, resp) => {
+  var filePath = path.join( __dirname, `../${req.body.filePath}`)
+
+  try{
+    fs.unlinkSync(filePath)
+    resp.status(204).send()
+  }catch(error){
+    resp.status(404).send()
+  }
+  
 })
 
 module.exports = router;

@@ -73,17 +73,35 @@ class DropBoxController{
             this.inputFileEl.style.display = "block"
         })
 
+        this.btnDeleteEl.addEventListener('click', event => {
+            var files = Array.from(this.getFilesSelection())
+
+
+            this.deleteFiles(files).then(resp => {
+                resp.forEach( r => {
+                    this.getFirebaseRef().child(r.key).remove()
+                })
+            }).catch(error => {
+                console.log(error)
+            })
+
+        })
+
         this.inputFileEl.addEventListener('change', event => {
+
             this.inputFileEl.style.display = "none"
             this.snackBarEl.style.display = "block"
 
-            this.sendFiles(event.target.files).then(files => {
+            this.sendFiles(event.target.files)
+            .then( files => {
                 files.forEach(file => {
                     this.getFirebaseRef().push().set(file.files['input-file'])
                 })
-
                 setTimeout(() => this.initialState(), 2000)
-            }).catch(error => console.error(error))
+            })
+            .catch(error => {
+                console.log(error)
+            })
         })
 
         this.listFilesEl.addEventListener('onselectionchange', event => {
@@ -109,41 +127,91 @@ class DropBoxController{
         this.inputFileEl.value = ""
     }
 
-    sendFiles(files){
+    ajax(url, method = "GET", formdata = new FormData(), onprogress = function(){}, onload = function(){}){
+        
+        var ajax = new XMLHttpRequest()
+
+        ajax.open(method, url)
+
+        ajax.onprogress = event => onprogress(event)
+
+        ajax.onload = () => {
+            onload(ajax)
+        }
+
+        if(typeof formdata == 'string'){
+            ajax.setRequestHeader('Content-Type', 'application/json');
+            ajax.send(JSON.stringify({filePath: formdata}))
+        }
+
+        if(typeof formdata == 'object'){
+            ajax.send(formdata)
+        }
+    }
+
+    deleteFiles(files){
         var promises = []
 
-        var groupedFiles = [...files]
-
-        groupedFiles.forEach(file => {
+        files.forEach(file => {
             promises.push(new Promise((resolve, reject) => {
-                var ajax = new XMLHttpRequest()
+                var key = file.dataset.key
+                var filePath = (JSON.parse(file.dataset.file)).path
 
-                ajax.open('POST', '/uploads')
+                var onprogress = () => {}
 
-                ajax.onload = event => {
+                var onload = (ajax) => {
                     try{
                         resolve(JSON.parse(ajax.responseText))
                     }catch(error){
+                        console.log('1')
                         reject(error)
                     }
                 }
 
-                ajax.error = error => reject(error)
+                this.ajax('/deletefiles', 'DELETE', filePath, () => {
 
-                let formData = new FormData()
+                }, (ajax) => {
+                    try{
+                        if(ajax.status == 404){
+                            reject("File not found.")
+                        }
 
-                formData.append('input-file', file)
+                        resolve({ key })
+                    }catch(error){
+                        reject(error)
+                    }
+                })
+            }))
+        })
 
-                var startTime = new Date()
+        return Promise.all(promises)
+    }
 
-                ajax.upload.onprogress = event => {
+    sendFiles(files){
+        var groupedFiles = [...files]
+
+        var promises = []
+
+        groupedFiles.forEach(file => {
+
+            let formdata = new FormData()
+
+            formdata.append('input-file', file)
+
+            promises.push(new Promise((resolve, reject) => {
+                this.ajax('/uploads', 'POST', formdata, (event) => {
+                    var startTime = new Date()
                     this.btnSendFileEl.disabled = true
                     this.calculateProgressBar(event.loaded, event.total)
                     this.changeSnackbarTitle(file.name)
                     this.calculateTimeRemaining(startTime, event.loaded, event.total - event.loaded)
-                }
-
-                ajax.send(formData)
+                }, (ajax) => {
+                    try{
+                        resolve(JSON.parse(ajax.responseText)) 
+                    }catch(error){
+                        reject(error)
+                    }
+                })
             }))
         })
 
