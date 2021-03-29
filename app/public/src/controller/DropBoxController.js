@@ -5,12 +5,14 @@ class DropBoxController{
         this.initEvents()
         this.customizedEvents()
         this.initFireBase()
-        this.readFiles()
+        this.readDirectory()
 
     }
 
     initElements(){
 
+        this.currentFolder = ['Dropbox']
+        this.navTitle = document.querySelector("#browse-location")
         this.btnSendFileEl = document.querySelector('#btn-send-file')
         this.btnNewFolderEl = document.querySelector("#btn-new-folder")
         this.btnRenameEl = document.querySelector("#btn-rename")
@@ -22,6 +24,12 @@ class DropBoxController{
         this.snackBarPercentProgressEl = this.snackBarEl.querySelector(".percent-progress")
         this.snackBarTimeLeft = this.snackBarEl.querySelector(".timeleft")
         this.listFilesEl = document.querySelector("#list-of-files-and-directories")
+
+    }
+
+    readDirectory(){
+
+        this.readFiles()
 
     }
 
@@ -43,8 +51,8 @@ class DropBoxController{
         firebase.initializeApp(firebaseConfig)
     }
 
-    getFirebaseRef(){
-        return firebase.database().ref('/files')
+    getFirebaseRef(path){
+        return firebase.database().ref(path)
     }
 
     getFilesSelection(){
@@ -52,6 +60,18 @@ class DropBoxController{
     }
 
     initEvents(){
+
+        this.btnNewFolderEl.addEventListener('click', event => {
+            var name = prompt("Enter the folder's name:")
+
+            if(name){
+                this.getFirebaseRef(this.currentFolder.join('/')).push().set({
+                    name,
+                    type: "folder",
+                    path: this.currentFolder.join('/')
+                })
+            }
+        })
 
         this.btnRenameEl.addEventListener('click', e => {
             var file = JSON.parse(this.getFilesSelection()[0].dataset.file)
@@ -64,7 +84,7 @@ class DropBoxController{
 
                 file.name = newName
 
-                this.getFirebaseRef().child(key).set(file)
+                this.getFirebaseRef(this.currentFolder.join('/')).child(key).set(file)
             }
 
         })
@@ -79,7 +99,7 @@ class DropBoxController{
 
             this.deleteFiles(files).then(resp => {
                 resp.forEach( r => {
-                    this.getFirebaseRef().child(r.key).remove()
+                    this.getFirebaseRef(this.currentFolder.join('/')).child(r.key).remove()
                 })
             }).catch(error => {
                 console.log(error)
@@ -95,7 +115,8 @@ class DropBoxController{
             this.sendFiles(event.target.files)
             .then( files => {
                 files.forEach(file => {
-                    this.getFirebaseRef().push().set(file.files['input-file'])
+                    console.log(`path: ${this.currentFolder.join('/')}`)
+                    this.getFirebaseRef(this.currentFolder.join('/')).push().set(file.files['input-file'])
                 })
                 setTimeout(() => this.initialState(), 2000)
             })
@@ -430,6 +451,19 @@ class DropBoxController{
         }
     }
 
+    enterOnFolder(path){
+
+        this.getFirebaseRef(this.currentFolder.join('/')).off()
+
+        this.currentFolder = []
+
+        for(let index in path){
+            this.currentFolder.push(path[index])
+        }
+
+        this.readFiles()
+    }
+
     getFileView(file, key){
         var li = document.createElement("li")
 
@@ -443,6 +477,18 @@ class DropBoxController{
 
         li.dataset.key = key
         li.dataset.file = JSON.stringify(file)
+
+        li.addEventListener('dblclick', event => {
+
+            var folder = JSON.parse(li.dataset.file)
+            
+            if(folder.type == 'folder'){
+                var targetPath = []
+                targetPath.push(...this.currentFolder)
+                targetPath.push(folder.name)
+                this.enterOnFolder(targetPath)
+            }
+        })
 
         li.addEventListener('click', e => {
             var items = Array.from(this.listFilesEl.children)
@@ -514,7 +560,13 @@ class DropBoxController{
     }
 
     readFiles(){
-        this.getFirebaseRef().on('value', data => {
+
+        var path = this.currentFolder.join('/')
+
+        this.createNavItem()
+
+        this.getFirebaseRef(path).on('value', data => {
+
             var files = data.val()
 
             this.listFilesEl.innerHTML = ""
@@ -523,9 +575,57 @@ class DropBoxController{
                 var file = files[index]
                 var key = index
 
-                this.listFilesEl.appendChild(this.getFileView(file, key))
+                if(file.type){
+                    this.listFilesEl.appendChild(this.getFileView(file, key))
+                }
+
             }
 
         })
+    }
+
+    createNavItem(){
+
+        this.navTitle.innerHTML = ""
+
+        for(let i = 0; i < this.currentFolder.length; i++){
+            var item = document.createElement("div")
+
+            var path = this.currentFolder.slice(0, i + 1)
+
+            if(i+1 != this.currentFolder.length){
+
+                item.innerHTML = 
+                `
+                <span class="ue-effect-container uee-BreadCrumbSegment-link-0">
+                <a href class="breadcrumb-segment folder-link">${this.currentFolder[i]}</a>
+                </span>
+                <svg width="24" height="24" viewBox="0 0 24 24" class="mc-icon-template-stateless">
+                <title>arrow-right</title>
+                <path d="M10.414 7.05l4.95 4.95-4.95 4.95L9 15.534 12.536 12 9 8.464z" fill="#637282" fill-rule="evenodd"></path>
+                </svg>&nbsp
+                `
+
+                var link = item.querySelector('a')
+
+                link.dataset.path = path
+
+                link.addEventListener('click', event => {
+                    event.preventDefault()
+                    this.enterOnFolder(event.target.dataset.path.split(','))
+                })
+            }else{
+
+                item.innerHTML = 
+                `
+                    <p class="currentpath">${this.currentFolder[i]}</p>
+                `
+
+                item.dataset.path = path
+            }
+
+            this.navTitle.appendChild(item)
+
+        }
     }
 }

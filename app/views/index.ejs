@@ -44,11 +44,54 @@
         #list-of-files-and-directories .selected{
             background-color: rgba(5, 9, 238, 0.39);
         }
+
+        .currentpath{
+            display: flex;
+            height: fit-content;
+            width: fit-content;
+            margin: 0px;
+        }
+
+        nav#browse-location{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        nav#browse-location *{
+            align-self: center;
+        }
+
+        a:hover{
+            text-decoration: none;
+        }
+
+        #btn-new-folder *{
+            padding-right: 10px;
+            color: rgb(255, 255, 255);
+        }
+
+        button#btn-new-folder{
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            background-color: rgb(160, 153, 246);
+            color: #fff;
+            outline: none;
+        }
+
+        button{
+            margin: 5px 0px;
+        }
+
+        button#btn-new-folder:hover{
+            outline: none;
+            background-color: rgb(121, 112, 245);
+        }
     </style>
 </head>
 
 <body>
-
     <div class="container-fluid">
         <div class="row">
             <nav class="col-md-2 d-none d-md-block bg-light sidebar">
@@ -158,18 +201,7 @@
                             <span class="ue-effect-container uee-PageletMaestroHeader-Title">
                                 <span>
                                     <h1 class="ax-visually-hidden">My files</h1>
-                                    <nav class="page-header-text u-l-fl" id="browse-location" aria-label="Folder hierarchy" role="navigation">
-                                        <span class="breadcrumb-segment__wrapper">
-                                            <span class="ue-effect-container uee-BreadCrumbSegment-link-0">
-                                                <a href="https://www.dropbox.com/work" class="breadcrumb-segment">Dropbox</a>
-                                            </span>
-                                            <svg width="24" height="24" viewBox="0 0 24 24" class="mc-icon-template-stateless" style="top: 4px; position: relative;">
-                                                <title>arrow-right</title>
-                                                <path d="M10.414 7.05l4.95 4.95-4.95 4.95L9 15.534 12.536 12 9 8.464z" fill="#637282"
-                                                    fill-rule="evenodd"></path>
-                                            </svg>
-                                        </span>
-                                        <span>Avell</span>
+                                    <nav class="page-header-text u-l-fl" id="browse-location">
                                     </nav>
                                 </span>
                             </span>
@@ -215,7 +247,7 @@
                         <div class="col-md-3 file-options">
                             <button id="btn-send-file" type="button" class="btn btn-primary btn-block btn-sm">Send files</button>
                             <input type="file" id="files" style="display:none;" multiple>
-                            <button id="btn-new-folder" type="button" class="btn btn-link btn-block btn-sm btn-icon"><i class="ion-android-folder-open"></i>New folder</button>
+                            <button id="btn-new-folder" type="button" class="btn btn-block btn-sm btn-icon"><i class="ion-android-folder-open"></i>New folder</button>
                             <button id="btn-rename" style="display: none;" type="button" class="btn btn-link btn-block btn-sm btn-icon"><i class="ion-edit"></i>Rename</button>
                             <button id="btn-delete" style="display: none;" type="button" class="btn btn-link btn-block btn-sm btn-icon"><i class="ion-trash-a"></i>Delete</button>
                         </div>
