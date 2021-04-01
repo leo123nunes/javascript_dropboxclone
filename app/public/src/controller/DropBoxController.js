@@ -11,6 +11,7 @@ class DropBoxController{
 
     initElements(){
 
+        this.baseApiUrl = 'localhost:3000'
         this.currentFolder = ['Dropbox']
         this.navTitle = document.querySelector("#browse-location")
         this.btnSendFileEl = document.querySelector('#btn-send-file')
@@ -55,6 +56,10 @@ class DropBoxController{
         return firebase.database().ref(path)
     }
 
+    getFireBaseStorageRef(){
+        return firebase.storage().ref(this.currentFolder.join('/'))
+    }
+
     getFilesSelection(){
         return this.listFilesEl.querySelectorAll('.selected')
     }
@@ -97,12 +102,13 @@ class DropBoxController{
             var files = Array.from(this.getFilesSelection())
 
 
-            this.deleteFiles(files).then(resp => {
-                resp.forEach( r => {
-                    this.getFirebaseRef(this.currentFolder.join('/')).child(r.key).remove()
+            this.deleteFiles(files).then(keys => {
+
+                keys.forEach( key => {
+                    this.getFirebaseRef(this.currentFolder.join('/')).child(key).remove()
                 })
             }).catch(error => {
-                console.log(error)
+                console.error(error)
             })
 
         })
@@ -114,11 +120,18 @@ class DropBoxController{
 
             this.sendFiles(event.target.files)
             .then( files => {
-                files.forEach(file => {
-                    console.log(`path: ${this.currentFolder.join('/')}`)
-                    this.getFirebaseRef(this.currentFolder.join('/')).push().set(file.files['input-file'])
+
+                files.forEach(metadata => {
+
+                    var name = metadata.name
+                    var size = metadata.size
+                    var type = metadata.contentType
+                    var path = metadata.fullPath
+
+                    this.getFirebaseRef(this.currentFolder.join('/')).push().set({name, size, type, path})
+                    setTimeout(() => this.initialState(), 2000)
                 })
-                setTimeout(() => this.initialState(), 2000)
+
             })
             .catch(error => {
                 console.log(error)
@@ -156,9 +169,7 @@ class DropBoxController{
 
         ajax.onprogress = event => onprogress(event)
 
-        ajax.onload = () => {
-            onload(ajax)
-        }
+        ajax.onload = () => onload(ajax)
 
         // Deleting a file, the data will be the path of the file in string mode
 
@@ -180,31 +191,15 @@ class DropBoxController{
         files.forEach(file => {
             promises.push(new Promise((resolve, reject) => {
                 var key = file.dataset.key
-                var filePath = (JSON.parse(file.dataset.file)).path
 
-                var onprogress = () => {}
+                var filename = JSON.parse(file.dataset.file).name
 
-                var onload = (ajax) => {
-                    try{
-                        resolve(JSON.parse(ajax.responseText))
-                    }catch(error){
-                        console.log('1')
-                        reject(error)
-                    }
-                }
+                var fileRef = this.getFireBaseStorageRef().child(filename)
 
-                this.ajax('/deletefiles', 'DELETE', filePath, () => {
-
-                }, (ajax) => {
-                    try{
-                        if(ajax.status == 404){
-                            reject("File not found.")
-                        }
-
-                        resolve({ key })
-                    }catch(error){
-                        reject(error)
-                    }
+                fileRef.delete().then(resp => {
+                    resolve(key)
+                }).catch(error => {
+                    reject(error)
                 })
             }))
         })
@@ -219,24 +214,28 @@ class DropBoxController{
 
         groupedFiles.forEach(file => {
 
-            let formdata = new FormData()
-
-            formdata.append('input-file', file)
-
             promises.push(new Promise((resolve, reject) => {
-                this.ajax('/uploads', 'POST', formdata, (event) => {
-                    var startTime = new Date()
-                    this.btnSendFileEl.disabled = true
-                    this.calculateProgressBar(event.loaded, event.total)
-                    this.changeSnackbarTitle(file.name)
-                    this.calculateTimeRemaining(startTime, event.loaded, event.total - event.loaded)
-                }, (ajax) => {
-                    try{
-                        resolve(JSON.parse(ajax.responseText)) 
-                    }catch(error){
-                        reject(error)
-                    }
-                })
+                var ref = this.getFireBaseStorageRef().child(file.name)
+
+                var fileData = ref.put(file)
+
+                var startUploadTime = new Date()
+               
+                var progress = snapshot => {
+
+                    var total = snapshot.totalBytes
+                    var loaded = snapshot.bytesTransferred
+                    var fileName = file.name
+
+                    this.progressBarView(startUploadTime, total, loaded, fileName)
+                }
+
+                var loaded = () => {
+                    resolve(fileData.snapshot.metadata)
+                }
+
+                fileData.on('state_changed', () => progress(fileData.snapshot), () => reject(), () => loaded())
+            
             }))
         })
 
@@ -247,6 +246,13 @@ class DropBoxController{
         var percent = parseInt((100 * loaded) / total)
         this.progressBarEl.style.width = `${percent}%`
         this.snackBarTimeLeft.innerHTML = `${percent}%`
+    }
+
+    progressBarView(startTime, total, loaded, filename){
+        this.btnSendFileEl.disabled = true
+        this.calculateProgressBar(loaded, total)
+        this.changeSnackbarTitle(filename)
+        this.calculateTimeRemaining(startTime, loaded, total - loaded)
     }
 
     changeSnackbarTitle(name){
@@ -260,6 +266,9 @@ class DropBoxController{
     }
 
     timeConverter(milliseconds){
+
+        // console.log('milliseconds: ',milliseconds)
+
         var second = parseInt(milliseconds / 1000) > 1 ? parseInt(milliseconds / 1000) : null
         var minute = parseInt(second / 60) > 1 ? parseInt(second / 60) : null
         var hour = parseInt(minute / 60) > 1 ? parseInt(minute / 60) : null
@@ -269,18 +278,18 @@ class DropBoxController{
         hour = hour % 24
 
         if(hour){
-            return `remaining time - ${hour} hours, ${minute} minutes, and ${second} seconds.`
+            return `remaining ${hour} hours, ${minute} minutes, and ${second} seconds.`
         }
 
         if(minute){
-            return `remaining time - ${minute} minutes, and ${second} seconds.`
+            return `remaining ${minute} minutes, and ${second} seconds.`
         }
 
         if(second){
-            return `remaining time - ${second} seconds.`
+            return `remaining ${second} seconds.`
         }
 
-        return `remaining time - 0 seconds.`
+        return `remaining 0 seconds.`
         
     }
 
@@ -300,6 +309,7 @@ class DropBoxController{
             
             case 'image/jpeg':
             case 'image/jpg':
+            case 'image/png':
             case 'image/gif':
                 return `
                 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="160px" height="160px" viewBox="0 0 160 160" enable-background="new 0 0 160 160" xml:space="preserve">
@@ -408,6 +418,7 @@ class DropBoxController{
 
             case 'video/webm':
             case 'video/3gpp':
+            case 'video/mp4':
                 return `
                 <svg width="160" height="160" viewBox="0 0 160 160" class="mc-icon-template-content tile__preview tile__preview--icon">
                     <title>content-video-large</title>
@@ -487,6 +498,17 @@ class DropBoxController{
                 targetPath.push(...this.currentFolder)
                 targetPath.push(folder.name)
                 this.enterOnFolder(targetPath)
+            }else{
+                var path = JSON.parse(li.dataset.file).path
+
+                this.ajax(`/file?path=${path}`, 'GET', path, () => {}, data => {
+
+                    if(data.status == 404){
+                        window.open(`http://localhost:3000/filenotfound`)
+                    }else{
+                        window.open(data.responseURL)
+                    }
+                })
             }
         })
 

@@ -9,6 +9,31 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
+router.get('/file', (req, resp) => {
+
+  var path = './' + req.query.path
+  
+  try{
+    fs.existsSync(path)
+
+    fs.readFile(path, (error, file) => {
+
+      if(error){
+        resp.status(404).send()
+      }
+
+      // resp.status(200).send(file)
+      resp.status(200).end(file).send()
+    })
+  }catch(error){
+    resp.status(404).send()
+  }
+})
+
+router.get('/filenotfound', (req, resp) => {
+  resp.sendFile(path.join(__dirname, '../public/src/templates/404page.html'))
+})
+
 router.post('/uploads', (req, resp) => {
   try{
     var form = new formidable.IncomingForm({
