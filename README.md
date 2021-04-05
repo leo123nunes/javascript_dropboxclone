@@ -21,7 +21,7 @@ npm install
 npm run start
 ```
 
-* The app win run at http://localhost:3000/
+* The app will run on http://localhost:3000/
 
 ## Author
 
