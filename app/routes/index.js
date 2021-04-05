@@ -4,6 +4,12 @@ var formidable = require('formidable')
 var fs = require('fs')
 var path = require('path')
 
+/*
+
+ This code is to use with ajax requests in place of Firebase storage.
+
+*/
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });

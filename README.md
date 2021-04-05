@@ -32,3 +32,36 @@ npm run start
 
 The project has a screenshot folder that countains images of the finished project. I hope you enjoy!
 
+## Programming languages
+
+Javascript, HTML and CSS.
+
+## Frameworks / Libraries
+
+Bootstrap.
+
+## Database
+
+Firebase database and Firebase storage.
+
+## IDE
+
+Visual Studio Code Version 1.53.0
+
+## Dependencies
+
+{
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "ejs": "~2.6.1",
+    "express": "~4.16.1",
+    "firebase": "^8.3.1",
+    "formidable": "^1.2.2",
+    "http-errors": "~1.6.3",
+    "morgan": "~1.9.1",
+    "readme-md-generator": "^1.0.0"
+  }
+ 
+
+
+
