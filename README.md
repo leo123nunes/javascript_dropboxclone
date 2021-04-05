@@ -35,7 +35,3 @@ npm run start
 
 The project has a screenshot folder that countains images of the finished project. I hope you enjoy!
 
-Give a ⭐️ if this project helped you!
-
-***
-_This README was generated with ❤️ by [readme-md-generator](https://github.com/kefranabg/readme-md-generator)_
