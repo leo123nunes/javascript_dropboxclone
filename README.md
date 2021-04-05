@@ -29,9 +29,11 @@ npm run start
 
 * Website: https://www.linkedin.com/in/leonardonunesoliveira/
 * Github: [@leo123nunes](https://github.com/leo123nunes)
-* LinkedIn: [@Leonardo Nunes de Oliveira](https://linkedin.com/in/Leonardo Nunes de Oliveira)
+* LinkedIn: [@Leonardo Nunes de Oliveira](https://www.linkedin.com/in/leonardonunesoliveira/)
 
 ## Show your support
+
+The project has a screenshot folder that countains images of the finished project. I hope you enjoy!
 
 Give a ⭐️ if this project helped you!
 
