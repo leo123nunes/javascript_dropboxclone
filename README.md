@@ -3,11 +3,9 @@
   <img alt="Version" src="https://img.shields.io/badge/version-0.0.0-blue.svg?cacheSeconds=2592000" />
 </p>
 
-> Application to upload, store and open files.
+> A Dropbox clone project, using javascript and bootstrap in front end, and Firebase database and Firebase storage in back end. An application to upload, store and open files.
 
 ### 🏠 [Homepage](https://github.com/leo123nunes/dropboxclone-javascript)
-
-### ✨ [Demo](https://github.com/leo123nunes/dropboxclone-javascript)
 
 ## Install
 
@@ -27,11 +25,8 @@ npm run start
 
 👤 **Leonardo Nunes de Oliveira**
 
-* Website: https://www.linkedin.com/in/leonardonunesoliveira/
-* Github: [@leo123nunes](https://github.com/leo123nunes)
-* LinkedIn: [@Leonardo Nunes de Oliveira](https://www.linkedin.com/in/leonardonunesoliveira/)
-
-## Show your support
+* Github: https://github.com/leo123nunes
+* LinkedIn: https://www.linkedin.com/in/leonardonunesoliveira/
 
 The project has a screenshot folder that countains images of the finished project. I hope you enjoy!
 
