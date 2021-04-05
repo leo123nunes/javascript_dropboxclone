@@ -22,7 +22,6 @@ router.get('/file', (req, resp) => {
         resp.status(404).send()
       }
 
-      // resp.status(200).send(file)
       resp.status(200).end(file).send()
     })
   }catch(error){
@@ -45,7 +44,6 @@ router.post('/uploads', (req, resp) => {
       resp.send({files})
     })
   }catch(error){
-    console.log(`Error updating the file: ${error}`)
     resp.status(500).send()
   }
 })

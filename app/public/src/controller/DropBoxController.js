@@ -52,12 +52,12 @@ class DropBoxController{
         firebase.initializeApp(firebaseConfig)
     }
 
-    getFirebaseRef(path){
+    getFirebaseDatabaseRef(path = this.currentFolder.join('/')){
         return firebase.database().ref(path)
     }
 
-    getFireBaseStorageRef(){
-        return firebase.storage().ref(this.currentFolder.join('/'))
+    getFirebaseStorageRef(path = this.currentFolder.join('/')){
+        return firebase.storage().ref(path)
     }
 
     getFilesSelection(){
@@ -70,10 +70,14 @@ class DropBoxController{
             var name = prompt("Enter the folder's name:")
 
             if(name){
-                this.getFirebaseRef(this.currentFolder.join('/')).push().set({
+                this.getFirebaseDatabaseRef(this.currentFolder.join('/')).push().set({
                     name,
                     type: "folder",
                     path: this.currentFolder.join('/')
+                }).then(() => {
+
+                }).catch(error => {
+                    alert('Error creating a folder.')
                 })
             }
         })
@@ -89,7 +93,7 @@ class DropBoxController{
 
                 file.name = newName
 
-                this.getFirebaseRef(this.currentFolder.join('/')).child(key).set(file)
+                this.getFirebaseDatabaseRef(this.currentFolder.join('/')).child(key).set(file)
             }
 
         })
@@ -102,13 +106,10 @@ class DropBoxController{
             var files = Array.from(this.getFilesSelection())
 
 
-            this.deleteFiles(files).then(keys => {
-
-                keys.forEach( key => {
-                    this.getFirebaseRef(this.currentFolder.join('/')).child(key).remove()
-                })
+            this.delete(files).then(resp => {
+                alert('File(s) deleted.')
             }).catch(error => {
-                console.error(error)
+                alert('Error was occurred, failed to delete the files.')
             })
 
         })
@@ -128,13 +129,13 @@ class DropBoxController{
                     var type = metadata.contentType
                     var path = metadata.fullPath
 
-                    this.getFirebaseRef(this.currentFolder.join('/')).push().set({name, size, type, path})
+                    this.getFirebaseDatabaseRef(this.currentFolder.join('/')).push().set({name, size, type, path})
                     setTimeout(() => this.initialState(), 2000)
                 })
 
             })
             .catch(error => {
-                console.log(error)
+                console.error(error)
             })
         })
 
@@ -185,26 +186,104 @@ class DropBoxController{
         }
     }
 
-    deleteFiles(files){
+    delete(files){
         var promises = []
 
         files.forEach(file => {
             promises.push(new Promise((resolve, reject) => {
+
                 var key = file.dataset.key
+                var filedata = JSON.parse(file.dataset.file)
 
-                var filename = JSON.parse(file.dataset.file).name
+                var name = JSON.parse(file.dataset.file).name
+                var ref = this.currentFolder.join('/')
 
-                var fileRef = this.getFireBaseStorageRef().child(filename)
+                if(filedata.type === 'folder'){
 
-                fileRef.delete().then(resp => {
-                    resolve(key)
-                }).catch(error => {
-                    reject(error)
-                })
+                    this.removeFileDatabase(ref, key, name).then(() => {
+                        this.removeFolder(ref + '/' + name).then(resp => {
+                            resolve(resp)
+                        })
+                    }).catch(error => {
+                        reject(error)
+                    })
+
+                }else if(filedata.type){
+
+                    this.removeFileDatabase(ref, key, name).then(resp => {
+                        this.removeFileStorage(ref, name).then(resp => {
+                            resolve(key)
+                        })
+                    }).catch(error => {
+                        reject(error)
+                    })
+                }
             }))
         })
 
         return Promise.all(promises)
+    }
+
+    removeFolder(ref){
+
+        var promises = []
+
+
+        this.getFirebaseDatabaseRef(ref).on('value', data => {
+            
+            this.getFirebaseDatabaseRef(ref).off()
+
+            var data = data.val()
+
+            Object.keys(data).forEach(key => {
+
+                promises.push(new Promise((resolve, reject) => {
+
+                    if(data[key].type){
+                        this.removeFileDatabase(ref, key).then(resp => {
+
+                            if(data[key].type && data[key].type != 'folder' && data[key].path){
+                                this.removeFileStorage(ref, data[key].name).then(resp => {
+                                    resolve(data[key])
+                                })
+                            }else{
+                                resolve(data[key])
+                            }
+
+                        }).catch(error => {
+                            reject(error)
+                        })
+                    }else{
+
+                        var newRef = ref + '/' + key
+
+                        this.removeFolder(newRef).then(() => {
+                            resolve(data[key])
+                        }).catch(error => {
+                            reject(error)
+                        })
+
+                    }
+
+                }))
+            })
+            
+        })
+
+        return Promise.all(promises)
+
+    }
+
+    removeFileStorage(ref, name){
+
+        return this.getFirebaseStorageRef(ref).child(name).delete()
+
+    }
+
+    removeFileDatabase(ref, key){
+
+            return this.getFirebaseDatabaseRef(ref).child(key).remove()
+
     }
 
     sendFiles(files){
@@ -215,7 +294,7 @@ class DropBoxController{
         groupedFiles.forEach(file => {
 
             promises.push(new Promise((resolve, reject) => {
-                var ref = this.getFireBaseStorageRef().child(file.name)
+                var ref = this.getFirebaseStorageRef().child(file.name)
 
                 var fileData = ref.put(file)
 
@@ -266,8 +345,6 @@ class DropBoxController{
     }
 
     timeConverter(milliseconds){
-
-        // console.log('milliseconds: ',milliseconds)
 
         var second = parseInt(milliseconds / 1000) > 1 ? parseInt(milliseconds / 1000) : null
         var minute = parseInt(second / 60) > 1 ? parseInt(second / 60) : null
@@ -464,7 +541,7 @@ class DropBoxController{
 
     enterOnFolder(path){
 
-        this.getFirebaseRef(this.currentFolder.join('/')).off()
+        this.getFirebaseDatabaseRef(this.currentFolder.join('/')).off()
 
         this.currentFolder = []
 
@@ -499,16 +576,16 @@ class DropBoxController{
                 targetPath.push(folder.name)
                 this.enterOnFolder(targetPath)
             }else{
-                var path = JSON.parse(li.dataset.file).path
 
-                this.ajax(`/file?path=${path}`, 'GET', path, () => {}, data => {
+                console.log(li)
 
-                    if(data.status == 404){
-                        window.open(`http://localhost:3000/filenotfound`)
-                    }else{
-                        window.open(data.responseURL)
-                    }
+                this.getFirebaseStorageRef(this.currentFolder.join('/')).child(file.name).getDownloadURL().then(url => {
+                    window.open(url)
+                }).catch(error => {
+                    console.log(error)
+                    alert('Error was occurred.')
                 })
+
             }
         })
 
@@ -587,7 +664,7 @@ class DropBoxController{
 
         this.createNavItem()
 
-        this.getFirebaseRef(path).on('value', data => {
+        this.getFirebaseDatabaseRef(path).on('value', data => {
 
             var files = data.val()
 
