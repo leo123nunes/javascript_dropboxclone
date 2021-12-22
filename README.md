@@ -1,23 +1,23 @@
 # Dropbox clone
 A Dropbox clone project, using javascript and bootstrap in front end, and Firebase database and Firebase storage in back end. An application to upload, store and open files. 
 
-# Programming languages
+## Code languages
 
 Javascript, HTML and CSS.
 
-# Frameworks / Libraries
+## Frameworks / Libraries
 
 Bootstrap.
 
-# Database
+## Database
 
 Firebase database and Firebase storage.
 
-# IDE
+## IDE
 
 Visual Studio Code Version 1.53.0
   
-# Screenshots
+## Screenshots
 
 ![1](https://user-images.githubusercontent.com/53942734/143719582-945c1d76-6b36-49ea-b90f-fb16a64a5c27.png)<br></br>
 ![2](https://user-images.githubusercontent.com/53942734/143719583-899baece-ae50-4ead-972e-808d34cadcde.png)<br></br>
@@ -28,7 +28,7 @@ Visual Studio Code Version 1.53.0
 ![7](https://user-images.githubusercontent.com/53942734/143719589-a1090f60-858e-41fe-98d9-c0c59f8818a3.png)<br></br>
 ![8](https://user-images.githubusercontent.com/53942734/143719590-fccd900b-0456-4ab7-b5f8-1bd99e2e06df.png)<br></br>
 
-# Author
+## Author
 
 👤 **Leonardo Nunes de Oliveira**
 
