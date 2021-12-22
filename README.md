@@ -33,7 +33,7 @@ Visual Studio Code Version 1.53.0
 👤 **Leonardo Nunes de Oliveira**
 
 * Github: https://github.com/leo123nunes
-* LinkedIn: https://www.linkedin.com/in/leonardonunesoliveira/
+* LinkedIn: https://www.linkedin.com/in/leonunesoliveira/
 * Instagram: https://www.instagram.com/leo.nunesoliveira/
 * Facebook: https://www.facebook.com/leonardonunes.oliveira.1/
 
