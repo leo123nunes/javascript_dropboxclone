@@ -1,68 +1,21 @@
-<h1 align="center">Dropbox clone</h1>
-<p>
-  <img alt="Version" src="https://img.shields.io/badge/version-0.0.0-blue.svg?cacheSeconds=2592000" />
-</p>
+# Dropbox clone
+A Dropbox clone project, using javascript and bootstrap in front end, and Firebase database and Firebase storage in back end. An application to upload, store and open files. 
 
-> A Dropbox clone project, using javascript and bootstrap in front end, and Firebase database and Firebase storage in back end. An application to upload, store and open files.
-
-### 🏠 [Homepage](https://github.com/leo123nunes/dropboxclone-javascript)
-
-## Install
-
-```sh
-npm install
-```
-
-## Usage
-
-* Into the app folder.
-
-```sh
-npm run start
-```
-
-* The app will run on http://localhost:3000/
-
-## Author
-
-👤 **Leonardo Nunes de Oliveira**
-
-* Github: https://github.com/leo123nunes
-* LinkedIn: https://www.linkedin.com/in/leonardonunesoliveira/
-* Instagram: https://www.instagram.com/leo.nunesoliveira/
-* Facebook: https://www.facebook.com/leonardonunes.oliveira.1/
-
-The project has a screenshot folder that countains images of the finished project. I hope you enjoy!
-
-## Programming languages
+# Programming languages
 
 Javascript, HTML and CSS.
 
-## Frameworks / Libraries
+# Frameworks / Libraries
 
 Bootstrap.
 
-## Database
+# Database
 
 Firebase database and Firebase storage.
 
-## IDE
+# IDE
 
 Visual Studio Code Version 1.53.0
-
-## Dependencies
-
-{
-    "cookie-parser": "~1.4.4",
-    "debug": "~2.6.9",
-    "ejs": "~2.6.1",
-    "express": "~4.16.1",
-    "firebase": "^8.3.1",
-    "formidable": "^1.2.2",
-    "http-errors": "~1.6.3",
-    "morgan": "~1.9.1",
-    "readme-md-generator": "^1.0.0"
-  }
   
 # Screenshots
 
@@ -74,6 +27,15 @@ Visual Studio Code Version 1.53.0
 ![6](https://user-images.githubusercontent.com/53942734/143719588-9918342e-577b-4e5a-9707-51f4eb9b8df9.png)<br></br>
 ![7](https://user-images.githubusercontent.com/53942734/143719589-a1090f60-858e-41fe-98d9-c0c59f8818a3.png)<br></br>
 ![8](https://user-images.githubusercontent.com/53942734/143719590-fccd900b-0456-4ab7-b5f8-1bd99e2e06df.png)<br></br>
+
+# Author
+
+👤 **Leonardo Nunes de Oliveira**
+
+* Github: https://github.com/leo123nunes
+* LinkedIn: https://www.linkedin.com/in/leonardonunesoliveira/
+* Instagram: https://www.instagram.com/leo.nunesoliveira/
+* Facebook: https://www.facebook.com/leonardonunes.oliveira.1/
 
 
 
